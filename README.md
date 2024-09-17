@@ -1,0 +1,1 @@
+https://icfpcontest2018.github.io/full/task-description.html
