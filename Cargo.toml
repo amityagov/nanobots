@@ -1,7 +1,10 @@
 [workspace]
 resolver = "2"
 members = [
+  "crates/bot",
   "crates/commands",
+  "crates/console",
   "crates/mdl",
-  "crates/nbt"
+  "crates/nbt",
+  "crates/state"
 ]

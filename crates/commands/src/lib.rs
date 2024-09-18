@@ -1,54 +1,9 @@
-#[derive(Debug)]
-pub struct Sld {
-    pub a: u8,
-    pub i: u8,
-}
+mod distance;
 
-#[derive(Debug)]
-pub struct Lld {
-    pub a: u8,
-    pub i: u8,
-}
+pub use distance::*;
 
-#[derive(Debug)]
-pub struct Nd {
-    pub dx: i8,
-    pub dy: i8,
-    pub dz: i8,
-}
-
-impl Nd {
-    pub fn read(current: u8) -> Self {
-        let nd = current >> 3;
-
-        let dz = (nd % 3) as i8 - 1;
-        let dy = ((nd / 3) % 3) as i8 - 1;
-        let dx = (nd / 9) as i8 - 1;
-
-        Self { dx, dy, dz }
-    }
-}
-
-#[derive(Debug)]
-pub struct Fd {
-    pub dx: i8,
-    pub dy: i8,
-    pub dz: i8,
-}
-
-impl Fd {
-    pub fn read(buffer: &[u8; 3]) -> Self {
-        Self {
-            dx: buffer[0] as i8 - 30,
-            dy: buffer[1] as i8 - 30,
-            dz: buffer[2] as i8 - 30,
-        }
-    }
-}
 #[derive(Debug)]
 pub enum Command {
-    None,
-    NotParsed(u8),
     Halt,
     Wait,
     Flip,
@@ -74,7 +29,7 @@ pub fn read_bits(byte: u8, bit_count: u8) -> u8 {
 
 #[derive(Debug)]
 pub struct SMove {
-    pub lld: Lld,
+    pub lld: Difference,
 }
 
 impl SMove {
@@ -82,14 +37,16 @@ impl SMove {
         let a = current >> 4 & 0b11;
         let i = read_bits(buffer[0], 5);
 
-        Self { lld: Lld { a, i } }
+        Self {
+            lld: Lld::read(a, i),
+        }
     }
 }
 
 #[derive(Debug)]
 pub struct LMove {
-    pub sld1: Sld,
-    pub sld2: Sld,
+    pub sld1: Difference,
+    pub sld2: Difference,
 }
 
 impl LMove {
@@ -100,44 +57,44 @@ impl LMove {
         let i2 = value[0] >> 4 & 0b1111;
 
         Self {
-            sld1: Sld { a: a1, i: i1 },
-            sld2: Sld { a: a2, i: i2 },
+            sld1: Sld::read(a1, i1),
+            sld2: Sld::read(a2, i2),
         }
     }
 }
 
 #[derive(Debug)]
 pub struct FusionP {
-    pub nd: Nd,
+    pub nd: Difference,
 }
 
 impl FusionP {
     pub fn read(current: u8) -> Self {
-        let nd = Nd::read(current);
+        let nd = read_nd(current);
         Self { nd }
     }
 }
 
 #[derive(Debug)]
 pub struct FusionS {
-    pub nd: Nd,
+    pub nd: Difference,
 }
 
 impl FusionS {
     pub fn read(current: u8) -> Self {
-        let nd = Nd::read(current);
+        let nd = read_nd(current);
         Self { nd }
     }
 }
 #[derive(Debug)]
 pub struct Fission {
-    pub nd: Nd,
+    pub nd: Difference,
     pub m: u8,
 }
 
 impl Fission {
     pub fn read(current: u8, buffer: &[u8; 1]) -> Self {
-        let nd = Nd::read(current);
+        let nd = read_nd(current);
         let m = buffer[0];
         Self { nd, m }
     }
@@ -145,54 +102,54 @@ impl Fission {
 
 #[derive(Debug)]
 pub struct Fill {
-    pub nd: Nd,
+    pub nd: Difference,
 }
 
 impl Fill {
     pub fn read(current: u8) -> Self {
         Self {
-            nd: Nd::read(current),
+            nd: read_nd(current),
         }
     }
 }
 
 #[derive(Debug)]
 pub struct Void {
-    pub nd: Nd,
+    pub nd: Difference,
 }
 
 impl Void {
     pub fn read(current: u8) -> Self {
         Self {
-            nd: Nd::read(current),
+            nd: read_nd(current),
         }
     }
 }
 
 #[derive(Debug)]
 pub struct GFill {
-    pub nd: Nd,
-    pub fd: Fd,
+    pub nd: Difference,
+    pub fd: Difference,
 }
 
 impl GFill {
     pub fn read(current: u8, buffer: &[u8; 3]) -> Self {
-        let nd = Nd::read(current);
-        let fd = Fd::read(buffer);
+        let nd = read_nd(current);
+        let fd = read_fd(buffer);
         Self { nd, fd }
     }
 }
 
 #[derive(Debug)]
 pub struct GVoid {
-    pub nd: Nd,
-    pub fd: Fd,
+    pub nd: Difference,
+    pub fd: Difference,
 }
 
 impl GVoid {
     pub fn read(current: u8, buffer: &[u8; 3]) -> Self {
-        let nd = Nd::read(current);
-        let fd = Fd::read(buffer);
+        let nd = read_nd(current);
+        let fd = read_fd(buffer);
         Self { nd, fd }
     }
 }

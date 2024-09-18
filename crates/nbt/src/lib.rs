@@ -63,7 +63,7 @@ fn parse_command(current: u8, reader: &mut impl BufRead) -> anyhow::Result<Comma
             reader.read(&mut buffer)?;
             Ok(Command::GVoid(GVoid::read(current, &buffer)))
         }
-        _ => Ok(Command::NotParsed(current)),
+        _ => Err(anyhow::anyhow!("Command not recognized {current:b}")),
     }
 }
 
@@ -88,8 +88,6 @@ mod tests {
 
         for x in commands {
             match &x {
-                Command::None => {}
-                Command::NotParsed(_) => {}
                 Command::Halt => update("Halt", &mut counts),
                 Command::Wait => update("Wait", &mut counts),
                 Command::Flip => update("Flip", &mut counts),

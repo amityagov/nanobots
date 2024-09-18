@@ -16,9 +16,37 @@ pub struct Cell {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct Model {
+pub struct Matrix {
     cells: Vec<Cell>,
-    r: usize,
+    pub r: usize,
+}
+
+impl Matrix {
+    pub fn new(r: usize) -> Self {
+        let mut cells = Vec::with_capacity(r * r * r);
+        let mut index = 0;
+
+        for x in 0..r {
+            for y in 0..r {
+                for z in 0..r {
+                    cells.push(Cell {
+                        x,
+                        y,
+                        z,
+                        state: CellState::Void,
+                        index,
+                    });
+                    index += 1;
+                }
+            }
+        }
+        Self { r, cells }
+    }
+
+    pub fn set(&mut self, x: usize, y: usize, z: usize, state: CellState) {
+        let index = x * self.r * self.r + y * self.r + z;
+        self.cells[index].state = state;
+    }
 }
 
 fn get_state(byte: u8, position: usize) -> CellState {
@@ -29,21 +57,21 @@ fn get_state(byte: u8, position: usize) -> CellState {
     }
 }
 
-fn read_model_cells(reader: impl BufRead) -> impl Iterator<Item = CellState> {
+fn read_matrix_cells(reader: impl BufRead) -> impl Iterator<Item = CellState> {
     reader
         .bytes()
         .filter_map(Result::ok)
         .flat_map(|byte| (0..8).map(move |position| get_state(byte, position)))
 }
 
-pub fn read_model(reader: &mut impl BufRead) -> anyhow::Result<Model> {
+pub fn read_matrix(reader: &mut impl BufRead) -> anyhow::Result<Matrix> {
     let mut r_bytes = [0u8; 1];
     let r_bytes_count = reader.read(&mut r_bytes)?;
     if r_bytes_count < 1 {
         return Err(anyhow::anyhow!("Not enough bytes for resolution"));
     }
 
-    let mut cells_iterator = read_model_cells(reader);
+    let mut cells_iterator = read_matrix_cells(reader);
 
     let r = r_bytes[0] as usize;
     let expected_cell_count = r * r * r;
@@ -54,7 +82,7 @@ pub fn read_model(reader: &mut impl BufRead) -> anyhow::Result<Model> {
     while let Some(state) = cells_iterator.next() {
         if cell_processed == expected_cell_count {
             return Err(anyhow::anyhow!(
-                "Too many cells in model, expected {expected_cell_count}"
+                "Too many cells in model, expected {expected_cell_count}, r={r}"
             ));
         }
 
@@ -79,7 +107,7 @@ pub fn read_model(reader: &mut impl BufRead) -> anyhow::Result<Model> {
         ));
     }
 
-    Ok(Model { cells, r })
+    Ok(Matrix { cells, r })
 }
 
 #[cfg(test)]
@@ -93,7 +121,7 @@ mod tests {
         let data = include_bytes!("../../../data/FA004_tgt.mdl");
 
         let mut cursor = Cursor::new(data);
-        let model = read_model(&mut cursor)?;
+        let model = read_matrix(&mut cursor)?;
 
         let mut rng = thread_rng();
         let x = rng.gen_range(0..model.r);

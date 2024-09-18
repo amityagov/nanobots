@@ -1,0 +1,11 @@
+[package]
+name = "state"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.89"
+bot = { path = "../bot" }
+mdl = { path = "../mdl" }
+commands = { path = "../commands" }
+log = "0.4.22"
