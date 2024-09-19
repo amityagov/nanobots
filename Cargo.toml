@@ -6,5 +6,6 @@ members = [
   "crates/console",
   "crates/mdl",
   "crates/nbt",
-  "crates/state"
+  "crates/state",
+  "crates/ui"
 ]

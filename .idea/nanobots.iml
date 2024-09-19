@@ -8,6 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/mdl/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/nbt/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/state/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/ui/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
