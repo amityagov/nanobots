@@ -1,6 +1,8 @@
-use bevy::pbr::experimental::meshlet::{MaterialMeshletMeshBundle, Meshlet, MeshletMesh, MeshletPlugin};
-use bevy::prelude::*;
 use crate::cube_mesh::create_cube_mesh;
+use bevy::pbr::experimental::meshlet::{
+    MaterialMeshletMeshBundle, Meshlet, MeshletMesh, MeshletPlugin,
+};
+use bevy::prelude::*;
 
 pub struct CubePlugin;
 

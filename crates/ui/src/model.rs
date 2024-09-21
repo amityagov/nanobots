@@ -101,12 +101,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             ),
             ..default()
         }
-            .with_style(Style {
-                position_type: PositionType::Absolute,
-                bottom: Val::Px(28.0),
-                left: Val::Px(15.0),
-                ..default()
-            }),
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            bottom: Val::Px(28.0),
+            left: Val::Px(15.0),
+            ..default()
+        }),
     ));
 }
 
@@ -126,7 +126,7 @@ fn render_model(mut model: Query<(Entity, &mut ModelRenderProgress)>, mut comman
             data.level += 1;
             for x in cubes {
                 commands.spawn(Cube(x.x, x.y, x.z));
-                data.count+=1;
+                data.count += 1;
             }
         } else {
             commands.entity(entity).despawn();

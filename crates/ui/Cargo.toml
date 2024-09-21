@@ -16,3 +16,4 @@ futures-lite = "2.3.0"
 mdl = { path = "../mdl" }
 nbt = { path = "../nbt" }
 solvers = { path = "../solvers" }
+bytemuck = "1.18.0"

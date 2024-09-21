@@ -1,11 +1,13 @@
 mod camera;
 mod cube;
+mod cube_mesh;
+mod instancing;
 mod model;
 mod trace;
-mod cube_mesh;
 
 use crate::camera::CameraPlugin;
 use crate::cube::CubePlugin;
+use crate::instancing::InstancingPlugin;
 use crate::model::{LoadModelEvent, ModelPlugin, RenderModelEvent, SelectedModelState};
 use crate::trace::{LoadTraceEvent, TracePlugin};
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
@@ -40,6 +42,7 @@ fn main() {
             CubePlugin,
             StlPlugin,
             ObjPlugin,
+            InstancingPlugin,
         ))
         .add_systems(Update, ui_system)
         .add_systems(Startup, render_cube)

@@ -6,8 +6,8 @@ use bevy::prelude::{
     any_with_component, Bundle, Camera3dBundle, Commands, Component, DetectChanges, EventReader,
     IntoSystemConfigs, KeyCode, Plugin, Query, Res, Transform, Update,
 };
+use bevy::render::view::{GpuCulling, NoCpuCulling};
 use std::f32::consts::{FRAC_PI_2, PI, TAU};
-use bevy::render::view::{NoCpuCulling, GpuCulling};
 
 // Bundle to spawn our custom camera easily
 #[derive(Bundle, Default)]
