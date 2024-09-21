@@ -7,6 +7,7 @@ use bevy::prelude::{
     IntoSystemConfigs, KeyCode, Plugin, Query, Res, Transform, Update,
 };
 use std::f32::consts::{FRAC_PI_2, PI, TAU};
+use bevy::render::view::{NoCpuCulling, GpuCulling};
 
 // Bundle to spawn our custom camera easily
 #[derive(Bundle, Default)]
@@ -91,7 +92,7 @@ pub fn spawn_camera(mut commands: Commands) {
     camera.state.pitch = -0.40;
     camera.state.yaw = -2.35;
 
-    commands.spawn(camera);
+    commands.spawn((camera, GpuCulling, NoCpuCulling));
 }
 
 pub fn pan_orbit_camera(
@@ -248,7 +249,6 @@ pub fn pan_orbit_camera(
             // To position the camera, get the backward direction vector
             // and place the camera at the desired radius from the center.
             transform.translation = state.center + transform.back() * state.radius;
-            println!("{:?}", state);
         }
     }
 }

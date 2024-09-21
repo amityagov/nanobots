@@ -15,7 +15,7 @@ pub struct Cell {
     pub state: CellState,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Matrix {
     cells: Vec<Cell>,
     pub r: usize,
@@ -46,6 +46,19 @@ impl Matrix {
     pub fn set(&mut self, x: usize, y: usize, z: usize, state: CellState) {
         let index = x * self.r * self.r + y * self.r + z;
         self.cells[index].state = state;
+    }
+
+    pub fn get_level(&self, y: usize) -> Vec<Cell> {
+        let r = self.r;
+        let mut result = Vec::with_capacity(r * r);
+        for x in 0..self.r {
+            for z in 0..self.r {
+                let index = x * r * r + y * r + z;
+                result.push(self.cells[index].clone());
+            }
+        }
+
+        result
     }
 }
 

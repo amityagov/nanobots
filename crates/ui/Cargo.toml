@@ -6,8 +6,10 @@ edition = "2021"
 [dependencies]
 line_drawing = "1.0.0"
 anyhow = "1.0.89"
-bevy = "0.14.2"
+bevy = { version = "0.14.2", features = ["meshlet", "meshlet_processor", "default"] }
 bevy_egui = "0.29.0"
+bevy_stl = "0.14.0"
+bevy_obj = "0.14.0"
 egui = "0.28.1"
 rfd = "0.15.0"
 futures-lite = "2.3.0"

@@ -44,7 +44,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 },
             ),
             ..default()
-        }.with_style(Style {
+        }
+        .with_style(Style {
             position_type: PositionType::Absolute,
             bottom: Val::Px(28.0 * 1.7),
             left: Val::Px(15.0),

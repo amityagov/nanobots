@@ -1,17 +1,21 @@
 mod camera;
+mod cube;
 mod model;
 mod trace;
+mod cube_mesh;
 
 use crate::camera::CameraPlugin;
-use crate::model::{LoadModelEvent, ModelPlugin};
+use crate::cube::CubePlugin;
+use crate::model::{LoadModelEvent, ModelPlugin, RenderModelEvent, SelectedModelState};
 use crate::trace::{LoadTraceEvent, TracePlugin};
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy::window::WindowResolution;
 use bevy_egui::{EguiContexts, EguiPlugin};
-use line_drawing::WalkGrid;
+use bevy_obj::ObjPlugin;
+use bevy_stl::StlPlugin;
+use egui::Frame;
 use std::f32::consts::PI;
-use egui::{Align, Frame, Layout};
 
 fn main() {
     App::new()
@@ -29,17 +33,22 @@ fn main() {
             LogDiagnosticsPlugin::default(),
             EguiPlugin,
         ))
-        .add_plugins((CameraPlugin, ModelPlugin, TracePlugin))
+        .add_plugins((
+            CameraPlugin,
+            ModelPlugin,
+            TracePlugin,
+            CubePlugin,
+            StlPlugin,
+            ObjPlugin,
+        ))
         .add_systems(Update, ui_system)
         .add_systems(Startup, render_cube)
         .add_systems(Update, render_gizmos)
         .run();
 }
 
-#[derive(Component)]
-struct CubeTemplate(Handle<Mesh>, Handle<StandardMaterial>);
-
 fn render_gizmos(mut gizmos: Gizmos) {
+    return;
     gizmos.grid(
         Vec3::ZERO,
         Quat::from_rotation_x(PI / 2.),
@@ -63,69 +72,52 @@ fn render_gizmos(mut gizmos: Gizmos) {
     );
 }
 
-fn render_cube(
-    mut ambient_light: ResMut<AmbientLight>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut commands: Commands,
-) {
+fn render_cube(mut ambient_light: ResMut<AmbientLight>) {
     ambient_light.brightness = 200.0;
     ambient_light.color = Color::WHITE;
-
-    let mesh = meshes.add(Cuboid::new(0.98, 0.98, 0.98));
-    let mat = materials.add(StandardMaterial {
-        perceptual_roughness: 0.09,
-        base_color: Color::srgb(0.1, 0.1, 1.0),
-        ..Default::default()
-    });
-
-    commands.spawn(CubeTemplate(mesh.clone(), mat.clone()));
-
-    let bresenham = WalkGrid::new((1, 1), (7, 12));
-
-    for x in bresenham {
-        commands.spawn(PbrBundle {
-            mesh: mesh.clone_weak(),
-            material: mat.clone_weak(),
-            transform: Transform::from_xyz(1.0 * x.0 as f32, 1.0, 1.0 * x.1 as f32),
-            ..Default::default()
-        });
-    }
-
-    for _x in 0..10 {
-        for _y in 0..10 {
-            for _z in 0..10 {
-                // commands.spawn(PbrBundle {
-                //     mesh: mesh.clone_weak(),
-                //     material: mat.clone_weak(),
-                //     transform: Transform::from_xyz(1.0 * x as f32, 1.0 * y as f32, 1.0 * z as f32),
-                //     ..Default::default()
-                // });
-            }
-        }
-    }
 }
 
-fn ui_system(mut contexts: EguiContexts,
-             mut ev_load_model: EventWriter<LoadModelEvent>,
-             mut ev_load_trace: EventWriter<LoadTraceEvent>,
+fn ui_system(
+    mut contexts: EguiContexts,
+    mut ev_load_model: EventWriter<LoadModelEvent>,
+    mut ev_load_trace: EventWriter<LoadTraceEvent>,
+    mut ev_render_trace: EventWriter<RenderModelEvent>,
+    model: Query<(Entity, &SelectedModelState)>,
 ) {
     let ctx = contexts.ctx_mut();
-    egui::TopBottomPanel::bottom("text")
-        .show(ctx, |ui| {
-            Frame::default()
-                .inner_margin(2.0)
-                .show(ui, |ui| {
-                    ui.horizontal(|ui| {
-                        ui.add_enabled(false, egui::Button::new("Render model"));
-                        ui.button("Clear model");
-                        ui.separator();
+    egui::TopBottomPanel::bottom("text").show(ctx, |ui| {
+        Frame::default().inner_margin(2.0).show(ui, |ui| {
+            ui.horizontal(|ui| {
+                let has_model = model
+                    .get_single()
+                    .map_or_else(|_| false, |x| x.1.data.is_some());
 
-                        ui.button("Run trace");
-                        ui.button("Clear trace");
-                    });
-                });
+                if ui
+                    .add_enabled(has_model, egui::Button::new("Render model"))
+                    .clicked()
+                {
+                    ev_render_trace.send(RenderModelEvent);
+                }
+
+                if ui
+                    .add_enabled(has_model, egui::Button::new("Clear model"))
+                    .clicked()
+                {
+                    // clear
+                }
+
+                ui.separator();
+
+                if ui.button("Run trace").clicked() {
+                    println!("Run trace");
+                }
+
+                if ui.button("Clear trace").clicked() {
+                    println!("clicked");
+                }
+            });
         });
+    });
 
     egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
         egui::menu::bar(ui, |ui| {
