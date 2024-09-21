@@ -11,3 +11,4 @@ egui = "0.28.1"
 rfd = "0.15.0"
 futures-lite = "2.3.0"
 mdl = { path = "../mdl" }
+solvers = { path = "../solvers" }

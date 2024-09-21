@@ -1,0 +1,13 @@
+[package]
+name = "solvers"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.89"
+linkme = "0.3.28"
+nbt = { path = "../nbt" }
+commands = { path = "../commands" }
+mdl = { path = "../mdl" }
+state = { path = "../state" }
+bot = { path = "../bot" }
