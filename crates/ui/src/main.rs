@@ -1,12 +1,15 @@
 mod camera;
 mod model;
+mod trace;
 
 use crate::camera::CameraPlugin;
 use crate::model::{LoadModelEvent, ModelPlugin};
+use crate::trace::{LoadTraceEvent, TracePlugin};
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy::window::WindowResolution;
 use bevy_egui::{EguiContexts, EguiPlugin};
+use line_drawing::WalkGrid;
 use std::f32::consts::PI;
 
 fn main() {
@@ -25,7 +28,7 @@ fn main() {
             LogDiagnosticsPlugin::default(),
             EguiPlugin,
         ))
-        .add_plugins((CameraPlugin, ModelPlugin))
+        .add_plugins((CameraPlugin, ModelPlugin, TracePlugin))
         .add_systems(Update, ui_system)
         .add_systems(Startup, render_cube)
         .add_systems(Update, render_gizmos)
@@ -77,21 +80,35 @@ fn render_cube(
 
     commands.spawn(CubeTemplate(mesh.clone(), mat.clone()));
 
-    for x in 0..10 {
-        for y in 0..10 {
-            for z in 0..10 {
-                commands.spawn(PbrBundle {
-                    mesh: mesh.clone_weak(),
-                    material: mat.clone_weak(),
-                    transform: Transform::from_xyz(1.0 * x as f32, 1.0 * y as f32, 1.0 * z as f32),
-                    ..Default::default()
-                });
+    let bresenham = WalkGrid::new((1, 1), (7, 12));
+
+    for x in bresenham {
+        commands.spawn(PbrBundle {
+            mesh: mesh.clone_weak(),
+            material: mat.clone_weak(),
+            transform: Transform::from_xyz(1.0 * x.0 as f32, 1.0, 1.0 * x.1 as f32),
+            ..Default::default()
+        });
+    }
+
+    for _x in 0..10 {
+        for _y in 0..10 {
+            for _z in 0..10 {
+                // commands.spawn(PbrBundle {
+                //     mesh: mesh.clone_weak(),
+                //     material: mat.clone_weak(),
+                //     transform: Transform::from_xyz(1.0 * x as f32, 1.0 * y as f32, 1.0 * z as f32),
+                //     ..Default::default()
+                // });
             }
         }
     }
 }
 
-fn ui_system(mut contexts: EguiContexts, mut ev_load_model: EventWriter<LoadModelEvent>) {
+fn ui_system(mut contexts: EguiContexts,
+             mut ev_load_model: EventWriter<LoadModelEvent>,
+             mut ev_load_trace: EventWriter<LoadTraceEvent>,
+) {
     let ctx = contexts.ctx_mut();
     egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
         egui::menu::bar(ui, |ui| {
@@ -104,6 +121,12 @@ fn ui_system(mut contexts: EguiContexts, mut ev_load_model: EventWriter<LoadMode
             egui::menu::menu_button(ui, "Model", |ui| {
                 if ui.button("Load model").clicked() {
                     ev_load_model.send(LoadModelEvent);
+                }
+            });
+
+            egui::menu::menu_button(ui, "Trace", |ui| {
+                if ui.button("Load trace").clicked() {
+                    ev_load_trace.send(LoadTraceEvent);
                 }
             });
         });
