@@ -11,6 +11,7 @@ use bevy::window::WindowResolution;
 use bevy_egui::{EguiContexts, EguiPlugin};
 use line_drawing::WalkGrid;
 use std::f32::consts::PI;
+use egui::{Align, Frame, Layout};
 
 fn main() {
     App::new()
@@ -110,6 +111,22 @@ fn ui_system(mut contexts: EguiContexts,
              mut ev_load_trace: EventWriter<LoadTraceEvent>,
 ) {
     let ctx = contexts.ctx_mut();
+    egui::TopBottomPanel::bottom("text")
+        .show(ctx, |ui| {
+            Frame::default()
+                .inner_margin(2.0)
+                .show(ui, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.add_enabled(false, egui::Button::new("Render model"));
+                        ui.button("Clear model");
+                        ui.separator();
+
+                        ui.button("Run trace");
+                        ui.button("Clear trace");
+                    });
+                });
+        });
+
     egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
         egui::menu::bar(ui, |ui| {
             egui::menu::menu_button(ui, "File", |ui| {
