@@ -11,7 +11,7 @@ pub struct SolverState {}
 
 #[derive(Debug)]
 pub struct SolverResult {
-    elapsed: Duration,
+    pub elapsed: Duration,
 }
 
 pub type SolverType = fn(&SolverState) -> anyhow::Result<SolverResult>;
@@ -19,7 +19,7 @@ pub type SolverType = fn(&SolverState) -> anyhow::Result<SolverResult>;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use line_drawing::{Bresenham, WalkGrid};
+    use line_drawing::Bresenham;
 
     #[test]
     fn test() {

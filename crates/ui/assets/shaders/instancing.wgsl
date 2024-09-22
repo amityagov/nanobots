@@ -12,6 +12,7 @@ struct Vertex {
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
     @location(0) color: vec4<f32>,
+    @location(1) normal: vec3<f32>,
 };
 
 @vertex
@@ -27,10 +28,38 @@ fn vertex(vertex: Vertex) -> VertexOutput {
         vec4<f32>(position, 1.0)
     );
     out.color = vertex.i_color;
+    out.normal = vertex.normal;
     return out;
 }
 
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
-    return in.color;
+    // Calculate the distance from the fragment to the nearest edge
+    let edge_distance = min(min(in.color.x, in.color.y), in.color.z);
+    
+    // Define edge thickness
+    let edge_thickness = 0.05;
+    
+    // Create an edge color that's different from the vertex color
+    let edge_color = vec4<f32>(1.0 - in.color.rgb, in.color.a);
+    
+    // Interpolate between edge color and vertex color based on edge distance
+    let final_color = mix(edge_color, in.color, smoothstep(0.0, edge_thickness, edge_distance));
+    // Define a light direction (you might want to pass this as a uniform in a real scenario)
+    let light_direction = normalize(vec3<f32>(1.0, 1.0, 1.0));
+
+    let normal = normalize(in.normal);
+
+    // Calculate the diffuse factor
+    let diffuse_factor = max(dot(normal, light_direction), 0.0);
+
+    // Add ambient light
+    let ambient_strength = 0.1;
+    let ambient = ambient_strength * final_color.rgb;
+
+    // Calculate final color with lighting
+    let lit_color = ambient + diffuse_factor * final_color.rgb;
+
+    return vec4<f32>(lit_color, final_color.a);
+    // return vec4<f32>(0.1, 0.4, 0.8, 1.0); // Nice blue color
 }

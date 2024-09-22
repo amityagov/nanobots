@@ -162,7 +162,7 @@ fn listen_render_model_events(
     });
 }
 
-fn listen_clear_model_events(mut commands: Commands, mut events: EventReader<ClearModelEvent>) {
+fn listen_clear_model_events(mut _commands: Commands, mut _events: EventReader<ClearModelEvent>) {
     // events.read().for_each(|event| {});
 }
 
