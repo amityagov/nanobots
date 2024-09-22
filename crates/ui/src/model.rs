@@ -6,10 +6,13 @@ use mdl::{Cell, CellState, Matrix};
 use rfd::FileDialog;
 use std::fs::File;
 use std::io::BufReader;
+use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
 #[derive(Event)]
-pub struct LoadModelEvent;
+pub struct LoadModelEvent {
+    pub file: Option<PathBuf>,
+}
 
 #[derive(Event, Debug)]
 pub struct RenderModelEvent;
@@ -64,10 +67,12 @@ pub struct SelectedModelState {
 #[derive(Component)]
 struct ModelFileSelectionTask(Task<Option<ModelData>>);
 
-async fn load_matrix() -> anyhow::Result<ModelData> {
-    let filename = FileDialog::new()
-        .add_filter("Model file", &["mdl"])
-        .pick_file();
+async fn load_matrix(path: Option<PathBuf>) -> anyhow::Result<ModelData> {
+    let filename = path.or_else(|| {
+        FileDialog::new()
+            .add_filter("Model file", &["mdl"])
+            .pick_file()
+    });
 
     if let Some(filename) = filename {
         let start = Instant::now();
@@ -136,9 +141,10 @@ fn render_model(mut model: Query<(Entity, &mut ModelRenderProgress)>, mut comman
 }
 
 fn listen_load_model_events(mut commands: Commands, mut events: EventReader<LoadModelEvent>) {
-    events.read().for_each(|_| {
+    events.read().for_each(|event| {
         let thread_pool = AsyncComputeTaskPool::get();
-        let task = thread_pool.spawn(async move { load_matrix().await.ok() });
+        let path = event.file.clone();
+        let task = thread_pool.spawn(async move { load_matrix(path).await.ok() });
         commands.spawn(ModelFileSelectionTask(task));
     });
 }

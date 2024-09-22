@@ -27,7 +27,7 @@ fn render_cube(
                 1.0 * cube.2 as f32,
             ),
             scale: 1.0,
-            color: LinearRgba::from(Color::srgb(0.1, 0.1, 1.0)).to_f32_array(),
+            color: LinearRgba::from(Color::srgb(0.2, 0.4, 0.8)).to_f32_array(),
         });
 
         commands.entity(entity).despawn();

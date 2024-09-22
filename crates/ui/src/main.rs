@@ -9,7 +9,7 @@ use crate::cube::CubePlugin;
 use crate::instancing::InstancingPlugin;
 use crate::model::{LoadModelEvent, ModelPlugin, RenderModelEvent, SelectedModelState};
 use crate::trace::{LoadTraceEvent, TracePlugin};
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 use bevy::window::WindowResolution;
 use bevy_egui::{EguiContexts, EguiPlugin};
@@ -31,7 +31,6 @@ fn main() {
                 ..default()
             }),
             FrameTimeDiagnosticsPlugin,
-            LogDiagnosticsPlugin::default(),
             EguiPlugin,
         ))
         .add_plugins((
@@ -87,6 +86,48 @@ fn ui_system(
     model: Query<(Entity, &SelectedModelState)>,
 ) {
     let ctx = contexts.ctx_mut();
+    egui::SidePanel::left("left_panel")
+        .exact_width(300.0)
+        .show(ctx, |ui| {
+            ui.add_space(10.0);
+
+            ui.heading("Model");
+
+            use std::fs;
+            use std::path::Path;
+
+            let mdl_files = match fs::read_dir("/Users/axel/Downloads/problemsF") {
+                Ok(entries) => entries
+                    .filter_map(|entry| {
+                        let path = entry.ok()?.path();
+                        if path.extension()?.to_str()? == "mdl" {
+                            Some(path.file_name()?.to_str()?.to_owned())
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<String>>(),
+                Err(_) => Vec::new(),
+            };
+
+            let mut selected_mdl_file = mdl_files.first().cloned().unwrap_or_default();
+            egui::ComboBox::from_label("MDL File")
+                .selected_text(&selected_mdl_file)
+                .show_ui(ui, |ui| {
+                    for file in mdl_files.iter() {
+                        ui.selectable_value(&mut selected_mdl_file, file.to_string(), file);
+                    }
+                });
+
+            if ui.button("Load MDL").clicked() {
+                let file_path =
+                    Path::new("/Users/axel/Downloads/problemsF").join(&selected_mdl_file);
+                ev_load_model.send(LoadModelEvent {
+                    file: Some(file_path),
+                });
+            }
+        });
+
     egui::TopBottomPanel::bottom("text").show(ctx, |ui| {
         Frame::default().inner_margin(2.0).show(ui, |ui| {
             ui.horizontal(|ui| {
@@ -131,7 +172,7 @@ fn ui_system(
 
             egui::menu::menu_button(ui, "Model", |ui| {
                 if ui.button("Load model").clicked() {
-                    ev_load_model.send(LoadModelEvent);
+                    ev_load_model.send(LoadModelEvent { file: None });
                 }
             });
 
