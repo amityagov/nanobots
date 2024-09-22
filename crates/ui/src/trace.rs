@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::tasks::{AsyncComputeTaskPool, Task};
+use commands::Command;
 use futures_lite::future;
 use rfd::FileDialog;
 use std::fs::File;
@@ -14,7 +15,7 @@ struct TraceFileSelectionTask(Task<Option<TraceData>>);
 
 struct TraceData {
     path: String,
-    commands: Vec<nbt::Command>,
+    commands: Vec<Command>,
     elapsed: Duration,
 }
 

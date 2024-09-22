@@ -1,6 +1,5 @@
 mod camera;
 mod cube;
-mod cube_mesh;
 mod instancing;
 mod model;
 mod trace;

@@ -2,8 +2,8 @@ use state::StateCommand;
 use std::io::Cursor;
 
 fn main() -> anyhow::Result<()> {
-    let model_data = include_bytes!("../../../data/FA104_tgt.mdl");
-    let nbt_data = include_bytes!("../../../data/FA104.nbt");
+    let model_data = include_bytes!("../../../data/FA001_tgt.mdl");
+    let nbt_data = include_bytes!("../../../data/FA001.nbt");
     let mut matrix_reader = Cursor::new(model_data);
     let matrix = mdl::read_matrix(&mut matrix_reader)?;
 
@@ -36,7 +36,7 @@ mod tests {
     use glob;
     use state::StateCommand;
     use std::fs::File;
-    use std::io::{BufReader, Cursor};
+    use std::io::BufReader;
     use std::path::{Path, PathBuf};
     use std::time::Instant;
 

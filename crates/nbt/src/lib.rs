@@ -1,5 +1,6 @@
-pub use commands::Command;
-use commands::{read_bits, Fill, Fission, FusionP, FusionS, GFill, GVoid, LMove, SMove, Void};
+use commands::{
+    read_bits, Command, Fill, Fission, FusionP, FusionS, GFill, GVoid, LMove, SMove, Void,
+};
 use std::io::BufRead;
 
 pub fn read_commands(reader: &mut impl BufRead) -> anyhow::Result<Vec<Command>> {

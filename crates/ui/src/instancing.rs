@@ -37,31 +37,15 @@ impl Plugin for InstancingPlugin {
 
 fn setup(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>) {
     commands.spawn((
-        meshes.add(Cuboid::new(0.5, 0.5, 0.5)),
+        meshes.add(Cuboid::new(0.98, 0.98, 0.98)),
         SpatialBundle::INHERITED_IDENTITY,
-        InstanceMaterialData(
-            (1..=1000)
-                .flat_map(|x| (1..=1000).map(move |y| (x as f32 / 10.0, y as f32 / 10.0)))
-                .map(|(x, y)| InstanceData {
-                    position: Vec3::new(x * 10.0 - 5.0, y * 10.0 - 5.0, 0.0),
-                    scale: 1.0,
-                    color: LinearRgba::from(Color::hsla(x * 360., y, 0.5, 1.0)).to_f32_array(),
-                })
-                .collect(),
-        ),
-        // NOTE: Frustum culling is done based on the Aabb of the Mesh and the GlobalTransform.
-        // As the cube is at the origin, if its Aabb moves outside the view frustum, all the
-        // instanced cubes will be culled.
-        // The InstanceMaterialData contains the 'GlobalTransform' information for this custom
-        // instancing, and that is not taken into account with the built-in frustum culling.
-        // We must disable the built-in frustum culling by adding the `NoFrustumCulling` marker
-        // component to avoid incorrect culling.
+        InstanceMaterialData(vec![]),
         NoFrustumCulling,
     ));
 }
 
-#[derive(Component, Deref)]
-struct InstanceMaterialData(Vec<InstanceData>);
+#[derive(Component, Deref, DerefMut)]
+pub struct InstanceMaterialData(pub Vec<InstanceData>);
 
 impl ExtractComponent for InstanceMaterialData {
     type QueryData = &'static InstanceMaterialData;
@@ -97,10 +81,10 @@ impl Plugin for CustomMaterialPlugin {
 
 #[derive(Clone, Copy, Pod, Zeroable)]
 #[repr(C)]
-struct InstanceData {
-    position: Vec3,
-    scale: f32,
-    color: [f32; 4],
+pub struct InstanceData {
+    pub position: Vec3,
+    pub scale: f32,
+    pub color: [f32; 4],
 }
 
 #[allow(clippy::too_many_arguments)]

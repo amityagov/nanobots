@@ -2,7 +2,7 @@ use crate::cube::Cube;
 use bevy::prelude::*;
 use bevy::tasks::{AsyncComputeTaskPool, Task};
 use futures_lite::future;
-use mdl::{Cell, CellState};
+use mdl::{Cell, CellState, Matrix};
 use rfd::FileDialog;
 use std::fs::File;
 use std::io::BufReader;
@@ -44,13 +44,13 @@ impl Plugin for ModelPlugin {
 
 pub struct ModelData {
     path: String,
-    matrix: mdl::Matrix,
+    matrix: Matrix,
     elapsed: Duration,
 }
 
 #[derive(Component)]
 struct ModelRenderProgress {
-    matrix: mdl::Matrix,
+    matrix: Matrix,
     level: usize,
     started: bool,
     count: usize,
@@ -163,7 +163,7 @@ fn listen_render_model_events(
 }
 
 fn listen_clear_model_events(mut commands: Commands, mut events: EventReader<ClearModelEvent>) {
-    events.read().for_each(|event| {});
+    // events.read().for_each(|event| {});
 }
 
 fn poll_model_select(
